@@ -185,15 +185,15 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
 
         val node = this.data[position]
         // 移除子项
-        if (!node.childNode.isNullOrEmpty()) {
+        if (!node.childNode.isEmpty()) {
             if (node is BaseExpandNode) {
                 if (node.isExpanded) {
-                    val items = flatData(node.childNode!!)
+                    val items = flatData(node.childNode)
                     this.data.removeAll(items)
                     removeCount = items.size
                 }
             } else {
-                val items = flatData(node.childNode!!)
+                val items = flatData(node.childNode)
                 this.data.removeAll(items)
                 removeCount = items.size
             }
@@ -212,7 +212,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param data BaseNode 子node
      */
     fun nodeAddData(parentNode: BaseNode, data: BaseNode) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             it.add(data)
 
             if (parentNode is BaseExpandNode && !parentNode.isExpanded) {
@@ -232,7 +232,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param data BaseNode 添加的数据
      */
     fun nodeAddData(parentNode: BaseNode, childIndex: Int, data: BaseNode) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             it.add(childIndex, data)
 
             if (parentNode is BaseExpandNode && !parentNode.isExpanded) {
@@ -252,7 +252,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param newData 添加的数据集合
      */
     fun nodeAddData(parentNode: BaseNode, childIndex: Int, newData: Collection<BaseNode>) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             it.addAll(childIndex, newData)
 
             if (parentNode is BaseExpandNode && !parentNode.isExpanded) {
@@ -270,7 +270,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param childIndex Int 此位置是相对于其childNodes数据的位置！并不是整个data
      */
     fun nodeRemoveData(parentNode: BaseNode, childIndex: Int) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             if (childIndex >= it.size) {
                 return
             }
@@ -294,7 +294,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param childNode BaseNode 子node
      */
     fun nodeRemoveData(parentNode: BaseNode, childNode: BaseNode) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             if (parentNode is BaseExpandNode && !parentNode.isExpanded) {
                 it.remove(childNode)
                 return
@@ -312,7 +312,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param data BaseNode 新数据
      */
     fun nodeSetData(parentNode: BaseNode, childIndex: Int, data: BaseNode) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             if (childIndex >= it.size) {
                 return
             }
@@ -336,7 +336,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
      * @param newData Collection<BaseNode>
      */
     fun nodeReplaceChildData(parentNode: BaseNode, newData: Collection<BaseNode>) {
-        parentNode.childNode?.let {
+        parentNode.childNode.let {
             if (parentNode is BaseExpandNode && !parentNode.isExpanded) {
                 it.clear()
                 it.addAll(newData)
@@ -359,7 +359,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
                 notifyItemRangeRemoved(positionStart, removeCount)
                 notifyItemRangeInserted(positionStart, newFlatData.size)
             }
-//            notifyItemRangeChanged(parentIndex + 1 + getHeaderLayoutCount(), max(removeCount, newFlatData.size))
+    //            notifyItemRangeChanged(parentIndex + 1 + getHeaderLayoutCount(), max(removeCount, newFlatData.size))
         }
     }
 
@@ -381,7 +381,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
                 // 如果是展开状态 或者需要设置为展开状态
                 if (isExpanded == true || element.isExpanded) {
                     val childNode = element.childNode
-                    if (!childNode.isNullOrEmpty()) {
+                    if (!childNode.isEmpty()) {
                         val items = flatData(childNode, isExpanded)
                         newList.addAll(items)
                     }
@@ -391,7 +391,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
                 }
             } else {
                 val childNode = element.childNode
-                if (!childNode.isNullOrEmpty()) {
+                if (!childNode.isEmpty()) {
                     val items = flatData(childNode, isExpanded)
                     newList.addAll(items)
                 }
@@ -427,11 +427,11 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
             val adapterPosition = position + headerLayoutCount
 
             node.isExpanded = false
-            if (node.childNode.isNullOrEmpty()) {
+            if (node.childNode.isEmpty()) {
                 notifyItemChanged(adapterPosition, parentPayload)
                 return 0
             }
-            val items = flatData(node.childNode!!, if (isChangeChildCollapse) false else null)
+            val items = flatData(node.childNode, if (isChangeChildCollapse) false else null)
             val size = items.size
             this.data.removeAll(items)
             if (notify) {
@@ -467,11 +467,11 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
             val adapterPosition = position + headerLayoutCount
 
             node.isExpanded = true
-            if (node.childNode.isNullOrEmpty()) {
+            if (node.childNode.isEmpty()) {
                 notifyItemChanged(adapterPosition, parentPayload)
                 return 0
             }
-            val items = flatData(node.childNode!!, if (isChangeChildExpand) true else null)
+            val items = flatData(node.childNode, if (isChangeChildExpand) true else null)
             val size = items.size
             this.data.addAll(position + 1, items)
             if (notify) {
@@ -604,7 +604,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
         var lastPosition: Int = if (parentPosition == -1) {
             data.size - 1 // 如果没有父节点，则为最外层
         } else {
-            val dataSize = data[parentPosition].childNode?.size ?: 0
+            val dataSize = data[parentPosition].childNode.size
             parentPosition + dataSize + expandCount // 如果有父节点，则为子节点，父节点 + 子节点数量 + 展开的数量
         }
 
@@ -635,7 +635,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
 
         for (i in pos - 1 downTo 0) {
             val tempNode = this.data[i]
-            if (tempNode.childNode?.contains(node) == true) {
+            if (tempNode.childNode.contains(node)) {
                 return i
             }
         }
@@ -649,7 +649,7 @@ abstract class BaseNodeAdapter(nodeList: MutableList<BaseNode>? = null)
         val node = this.data[position]
         for (i in position - 1 downTo 0) {
             val tempNode = this.data[i]
-            if (tempNode.childNode?.contains(node) == true) {
+            if (tempNode.childNode.contains(node)) {
                 return i
             }
         }
